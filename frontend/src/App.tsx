@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import './App.css';
 
 interface LogEntry {
@@ -23,11 +24,9 @@ interface AlertRule {
 function App() {
   const [activeTab, setActiveTab] = useState<'logs' | 'rules'>('logs');
   
-  // Log State
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [filterLevel, setFilterLevel] = useState<string>('');
   
-  // Rule State
   const [rules, setRules] = useState<AlertRule[]>([]);
   const [newRule, setNewRule] = useState({
     name: '', target_service: '', target_level: 'ERROR', 
@@ -52,7 +51,7 @@ function App() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newRule)
     });
-    fetchRules(); // Refresh list
+    fetchRules();
     setNewRule({ name: '', target_service: '', target_level: 'ERROR', threshold_count: 5, time_window_minutes: 5, email_notification: '' });
   };
 
@@ -61,27 +60,45 @@ function App() {
     if (activeTab === 'rules') fetchRules();
   }, [activeTab, filterLevel]);
 
+  // --- NEW: Calculate Chart Data ---
+  const chartData = [
+    { name: 'INFO', count: logs.filter(l => l.log_level === 'INFO').length, color: '#3b82f6' }, // Blue
+    { name: 'WARN', count: logs.filter(l => l.log_level === 'WARN').length, color: '#f97316' }, // Orange
+    { name: 'ERROR', count: logs.filter(l => l.log_level === 'ERROR').length, color: '#ef4444' } // Red
+  ];
+
   return (
     <div className="container" style={{ padding: '20px', fontFamily: 'sans-serif', maxWidth: '1000px', margin: '0 auto' }}>
       <h2>Log Monitoring & Alerting Platform</h2>
       
-      {/* Navigation Tabs */}
       <div style={{ borderBottom: '2px solid #eee', marginBottom: '20px', paddingBottom: '10px' }}>
-        <button 
-          onClick={() => setActiveTab('logs')} 
-          style={{ marginRight: '10px', fontWeight: activeTab === 'logs' ? 'bold' : 'normal' }}>
+        <button onClick={() => setActiveTab('logs')} style={{ marginRight: '10px', fontWeight: activeTab === 'logs' ? 'bold' : 'normal' }}>
           Real-Time Logs
         </button>
-        <button 
-          onClick={() => setActiveTab('rules')}
-          style={{ fontWeight: activeTab === 'rules' ? 'bold' : 'normal' }}>
+        <button onClick={() => setActiveTab('rules')} style={{ fontWeight: activeTab === 'rules' ? 'bold' : 'normal' }}>
           Alert Rules
         </button>
       </div>
 
-      {/* --- LOGS VIEW --- */}
       {activeTab === 'logs' && (
         <div>
+          {/* --- NEW: Analytics Chart --- */}
+          <div style={{ background: '#f9f9f9', padding: '20px', borderRadius: '8px', marginBottom: '20px', height: '250px' }}>
+            <h3 style={{ marginTop: 0, textAlign: 'center' }}>Log Volume by Severity</h3>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData}>
+                <XAxis dataKey="name" />
+                <YAxis allowDecimals={false} />
+                <Tooltip cursor={{fill: 'transparent'}}/>
+                <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
           <div style={{ marginBottom: '20px' }}>
             <label>Filter Level: </label>
             <select onChange={(e) => setFilterLevel(e.target.value)} value={filterLevel}>
@@ -92,6 +109,7 @@ function App() {
             </select>
             <button onClick={fetchLogs} style={{ marginLeft: '10px' }}>Refresh</button>
           </div>
+          
           <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '2px solid #ccc' }}>
@@ -103,7 +121,7 @@ function App() {
                 <tr key={log.id} style={{ borderBottom: '1px solid #eee' }}>
                   <td style={{ padding: '8px 0' }}>{new Date(log.timestamp).toLocaleTimeString()}</td>
                   <td>{log.service_name}</td>
-                  <td style={{ color: log.log_level === 'ERROR' ? 'red' : log.log_level === 'WARN' ? 'orange' : 'blue' }}>
+                  <td style={{ color: log.log_level === 'ERROR' ? 'red' : log.log_level === 'WARN' ? 'orange' : 'blue', fontWeight: 'bold' }}>
                     {log.log_level}
                   </td>
                   <td>{log.message}</td>
@@ -114,10 +132,10 @@ function App() {
         </div>
       )}
 
-      {/* --- RULES VIEW --- */}
       {activeTab === 'rules' && (
+        /* ... Rules UI remains exactly the same ... */
         <div>
-          <form onSubmit={createRule} style={{ background: '#f9f9f9', padding: '15px', marginBottom: '20px', borderRadius: '5px' }}>
+           <form onSubmit={createRule} style={{ background: '#f9f9f9', padding: '15px', marginBottom: '20px', borderRadius: '5px' }}>
             <h3>Create New Alert Rule</h3>
             <input required placeholder="Rule Name" value={newRule.name} onChange={e => setNewRule({...newRule, name: e.target.value})} style={{ marginRight: '5px' }}/>
             <input required placeholder="Target Service (e.g. payment-api)" value={newRule.target_service} onChange={e => setNewRule({...newRule, target_service: e.target.value})} style={{ marginRight: '5px' }}/>
