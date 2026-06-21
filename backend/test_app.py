@@ -1,13 +1,17 @@
+import os
+# NEW: We force the environment variable to memory BEFORE importing the app!
+os.environ['DATABASE_URL'] = 'sqlite:///:memory:'
+
 import pytest
 from app import app, db
 
-# This creates a safe, temporary test environment
 @pytest.fixture
 def client():
     app.config['TESTING'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:' # Use fake memory DB!
     with app.test_client() as client:
         with app.app_context():
+            # Drop everything and create fresh tables just to be 100% safe
+            db.drop_all()
             db.create_all()
         yield client
 
@@ -33,5 +37,7 @@ def test_create_rule_and_ingest_log(client):
 
     # 3. Verify the log actually saved
     get_response = client.get('/api/logs')
+    
+    # This should now perfectly equal 1!
     assert len(get_response.json) == 1
     assert get_response.json[0]['message'] == "This should trigger the alert!"
