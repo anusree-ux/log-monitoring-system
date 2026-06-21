@@ -23,18 +23,16 @@ interface AlertRule {
 
 function App() {
   const [activeTab, setActiveTab] = useState<'logs' | 'rules'>('logs');
-  
+
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [filterLevel, setFilterLevel] = useState<string>('');
-  
+
   const [rules, setRules] = useState<AlertRule[]>([]);
   const [newRule, setNewRule] = useState({
-    name: '', target_service: '', target_level: 'ERROR', 
+    name: '', target_service: '', target_level: 'ERROR',
     threshold_count: 5, time_window_minutes: 5, email_notification: ''
   });
 
-  // Notice: No API_URL variable needed anymore! Nginx handles the routing.
-  
   const fetchLogs = async () => {
     const url = filterLevel ? `/api/logs?level=${filterLevel}` : '/api/logs';
     const res = await fetch(url);
@@ -64,15 +62,15 @@ function App() {
 
   // Calculate Chart Data
   const chartData = [
-    { name: 'INFO', count: logs.filter(l => l.log_level === 'INFO').length, color: '#3b82f6' }, 
-    { name: 'WARN', count: logs.filter(l => l.log_level === 'WARN').length, color: '#f97316' }, 
-    { name: 'ERROR', count: logs.filter(l => l.log_level === 'ERROR').length, color: '#ef4444' } 
+    { name: 'INFO', count: logs.filter(l => l.log_level === 'INFO').length, color: '#3b82f6' },
+    { name: 'WARN', count: logs.filter(l => l.log_level === 'WARN').length, color: '#f97316' },
+    { name: 'ERROR', count: logs.filter(l => l.log_level === 'ERROR').length, color: '#ef4444' }
   ];
 
   return (
     <div className="container" style={{ padding: '20px', fontFamily: 'sans-serif', maxWidth: '1000px', margin: '0 auto' }}>
       <h2>Log Monitoring & Alerting Platform</h2>
-      
+
       <div style={{ borderBottom: '2px solid #eee', marginBottom: '20px', paddingBottom: '10px' }}>
         <button onClick={() => setActiveTab('logs')} style={{ marginRight: '10px', fontWeight: activeTab === 'logs' ? 'bold' : 'normal' }}>
           Real-Time Logs
@@ -84,7 +82,7 @@ function App() {
 
       {activeTab === 'logs' && (
         <div>
-          {/* Analytics Chart Container - Fixed Height for Recharts */}
+          {/* Analytics Chart Container */}
           <div style={{ background: '#242424', padding: '20px', borderRadius: '8px', marginBottom: '20px', height: '250px', width: '100%' }}>
             <h3 style={{ marginTop: 0, textAlign: 'center', color: '#fff' }}>Log Volume by Severity</h3>
             <ResponsiveContainer width="100%" height="100%">
@@ -102,8 +100,6 @@ function App() {
           </div>
 
           <div style={{ marginBottom: '20px' }}>
-
-          <div style={{ marginBottom: '20px' }}>
             <label>Filter Level: </label>
             <select onChange={(e) => setFilterLevel(e.target.value)} value={filterLevel}>
               <option value="">ALL</option>
@@ -113,7 +109,7 @@ function App() {
             </select>
             <button onClick={fetchLogs} style={{ marginLeft: '10px' }}>Refresh</button>
           </div>
-          
+
           <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '2px solid #ccc' }}>
@@ -122,7 +118,7 @@ function App() {
             </thead>
             <tbody>
               {logs.map((log) => (
-                <tr key={log.id} style={{ borderBottom: '1px solid #eee' }}>
+                <tr key={log.id} style={{ borderBottom: '1px solid #444' }}>
                   <td style={{ padding: '8px 0' }}>{new Date(log.timestamp).toLocaleTimeString()}</td>
                   <td>{log.service_name}</td>
                   <td style={{ color: log.log_level === 'ERROR' ? '#ef4444' : log.log_level === 'WARN' ? '#f97316' : '#3b82f6', fontWeight: 'bold' }}>
