@@ -3,18 +3,20 @@ version: '3.8'
 services:
   backend:
     build: ./backend
-    ports:
-      - "5000:5000"
     volumes:
-      # This saves your SQLite database to your actual hard drive 
-      # so it doesn't get deleted when the container turns off
       - ./backend/logs.db:/app/logs.db
 
   frontend:
     build: ./frontend
-    ports:
-      - "5173:5173"
-    environment:
-      - VITE_BACKEND_URL=http://13.60.18.22:5000
     depends_on:
+      - backend
+    
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"  # This is the only port open to the outside world now!
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - frontend
       - backend

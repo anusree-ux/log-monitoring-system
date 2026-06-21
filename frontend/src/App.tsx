@@ -33,28 +33,28 @@ function App() {
     threshold_count: 5, time_window_minutes: 5, email_notification: ''
   });
 
-  const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+  // Notice: No API_URL variable needed anymore! Nginx handles the routing.
   
   const fetchLogs = async () => {
-    const url = filterLevel ? `${API_URL}/api/logs?level=${filterLevel}` : `${API_URL}/api/logs`;
+    const url = filterLevel ? `/api/logs?level=${filterLevel}` : '/api/logs';
     const res = await fetch(url);
     setLogs(await res.json());
   };
 
   const fetchRules = async () => {
-    const res = await fetch(`${API_URL}/api/rules`);
+    const res = await fetch('/api/rules');
     setRules(await res.json());
   };
 
   const createRule = async (e: React.FormEvent) => {
     e.preventDefault();
-    await fetch(`${API_URL}/api/rules`, {
+    await fetch('/api/rules', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newRule)
     });
-    fetchRules();
     setNewRule({ name: '', target_service: '', target_level: 'ERROR', threshold_count: 5, time_window_minutes: 5, email_notification: '' });
+    fetchRules();
   };
 
   useEffect(() => {
@@ -84,6 +84,7 @@ function App() {
 
       {activeTab === 'logs' && (
         <div>
+<<<<<<< HEAD
           {/* Analytics Chart Container - Fixed Height Added Here */}
           <div style={{ background: '#f9f9f9', padding: '20px', borderRadius: '8px', marginBottom: '20px', height: '250px', width: '100%' }}>
             <h3 style={{ marginTop: 0, textAlign: 'center', color: '#333' }}>Log Volume by Severity</h3>
@@ -92,6 +93,16 @@ function App() {
                 <XAxis dataKey="name" stroke="#333" />
                 <YAxis allowDecimals={false} stroke="#333" />
                 <Tooltip cursor={{fill: '#eee'}} contentStyle={{ color: '#000' }}/>
+=======
+          {/* Analytics Chart Container - Fixed Height for Recharts */}
+          <div style={{ background: '#242424', padding: '20px', borderRadius: '8px', marginBottom: '20px', height: '250px', width: '100%' }}>
+            <h3 style={{ marginTop: 0, textAlign: 'center', color: '#fff' }}>Log Volume by Severity</h3>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData}>
+                <XAxis dataKey="name" stroke="#fff" />
+                <YAxis allowDecimals={false} stroke="#fff" />
+                <Tooltip cursor={{fill: '#333'}} contentStyle={{ color: '#000' }}/>
+>>>>>>> f357a9d (Reverse proxy)
                 <Bar dataKey="count" radius={[4, 4, 0, 0]}>
                   {chartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -123,7 +134,7 @@ function App() {
                 <tr key={log.id} style={{ borderBottom: '1px solid #eee' }}>
                   <td style={{ padding: '8px 0' }}>{new Date(log.timestamp).toLocaleTimeString()}</td>
                   <td>{log.service_name}</td>
-                  <td style={{ color: log.log_level === 'ERROR' ? 'red' : log.log_level === 'WARN' ? 'orange' : 'blue' }}>
+                  <td style={{ color: log.log_level === 'ERROR' ? '#ef4444' : log.log_level === 'WARN' ? '#f97316' : '#3b82f6', fontWeight: 'bold' }}>
                     {log.log_level}
                   </td>
                   <td>{log.message}</td>
@@ -136,8 +147,8 @@ function App() {
 
       {activeTab === 'rules' && (
         <div>
-          <form onSubmit={createRule} style={{ background: '#f9f9f9', padding: '15px', marginBottom: '20px', borderRadius: '5px' }}>
-            <h3>Create New Alert Rule</h3>
+          <form onSubmit={createRule} style={{ background: '#242424', padding: '15px', marginBottom: '20px', borderRadius: '5px' }}>
+            <h3 style={{color: '#fff'}}>Create New Alert Rule</h3>
             <input required placeholder="Rule Name" value={newRule.name} onChange={e => setNewRule({...newRule, name: e.target.value})} style={{ marginRight: '5px' }}/>
             <input required placeholder="Target Service" value={newRule.target_service} onChange={e => setNewRule({...newRule, target_service: e.target.value})} style={{ marginRight: '5px' }}/>
             <select value={newRule.target_level} onChange={e => setNewRule({...newRule, target_level: e.target.value})} style={{ marginRight: '5px' }}>
