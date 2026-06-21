@@ -1,4 +1,4 @@
-name: Continuous Deployment
+name: CI/CD Pipeline
 
 # This tells GitHub to run this script ONLY when code is pushed to the main branch
 on:
@@ -7,8 +7,36 @@ on:
       - main
 
 jobs:
+
+  #CI job
+  test:
+    name: Run Automated Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+
+      - name: Run Pytest
+        run: |
+          cd backend
+          pytest test_app.py
+
+
+  #CD Job
+
   deploy:
     name: Deploy to AWS EC2
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
