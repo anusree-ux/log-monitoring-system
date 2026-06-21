@@ -8,8 +8,9 @@ from datetime import datetime, timezone, timedelta
 app = Flask(__name__)
 CORS(app)
 
-# --- SQLite Configuration ---
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///logs.db'
+# --- Database Configuration ---
+# NEW: This line now looks for PostgreSQL first, but falls back to SQLite if running locally!
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///logs.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -22,9 +23,8 @@ class Log(db.Model):
     service_name = db.Column(db.String(255), nullable=False)
     log_level = db.Column(db.String(50), nullable=False)
     message = db.Column(db.Text, nullable=False)
-    log_metadata = db.Column(db.JSON, default={}) 
+    log_metadata = db.Column(db.JSON, default={})
 
-# NEW: Alert Rule Model
 class AlertRule(db.Model):
     __tablename__ = 'alert_rules'
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -55,7 +55,7 @@ def manage_rules():
         db.session.add(new_rule)
         db.session.commit()
         return jsonify({"status": "success", "id": new_rule.id}), 201
-    
+
     if request.method == 'GET':
         rules = AlertRule.query.all()
         result = [{
@@ -64,7 +64,6 @@ def manage_rules():
             "time_window_minutes": r.time_window_minutes, "email": r.email_notification
         } for r in rules]
         return jsonify(result), 200
-
 
 @app.route('/api/logs', methods=['POST'])
 def ingest_log():
@@ -81,27 +80,22 @@ def ingest_log():
     db.session.add(new_log)
     db.session.commit()
 
-    # NEW: Alert Evaluation Logic
-    # 1. Find rules that match this log's service and level
+    # Alert Evaluation Logic
     active_rules = AlertRule.query.filter_by(
-        target_service=new_log.service_name, 
+        target_service=new_log.service_name,
         target_level=new_log.log_level
     ).all()
 
-    # 2. Check if the threshold has been breached
     for rule in active_rules:
         time_threshold = datetime.now(timezone.utc) - timedelta(minutes=rule.time_window_minutes)
-        
-        # Count how many logs match this rule in the time window
+
         recent_logs_count = Log.query.filter(
             Log.service_name == rule.target_service,
             Log.log_level == rule.target_level,
             Log.timestamp >= time_threshold
         ).count()
-        
+
         if recent_logs_count >= rule.threshold_count:
-            # In a production app, we would send an actual email via SMTP/SendGrid here.
-            # For our MVP, we will print a loud alert to the terminal!
             print("\n" + "="*50)
             print(f"🚨 ALERT TRIGGERED: {rule.name} 🚨")
             print(f"Condition: {recent_logs_count} {rule.target_level}s from {rule.target_service} in the last {rule.time_window_minutes} mins.")
@@ -123,7 +117,7 @@ def get_logs():
     logs = query.order_by(Log.timestamp.desc()).limit(limit).all()
 
     result = [{
-        "id": log.id, "timestamp": log.timestamp.isoformat() + "Z", 
+        "id": log.id, "timestamp": log.timestamp.isoformat() + "Z",
         "service_name": log.service_name, "log_level": log.log_level,
         "message": log.message, "metadata": log.log_metadata
     } for log in logs]

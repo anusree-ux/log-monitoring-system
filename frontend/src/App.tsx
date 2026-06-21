@@ -84,16 +84,6 @@ function App() {
 
       {activeTab === 'logs' && (
         <div>
-<<<<<<< HEAD
-          {/* Analytics Chart Container - Fixed Height Added Here */}
-          <div style={{ background: '#f9f9f9', padding: '20px', borderRadius: '8px', marginBottom: '20px', height: '250px', width: '100%' }}>
-            <h3 style={{ marginTop: 0, textAlign: 'center', color: '#333' }}>Log Volume by Severity</h3>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData}>
-                <XAxis dataKey="name" stroke="#333" />
-                <YAxis allowDecimals={false} stroke="#333" />
-                <Tooltip cursor={{fill: '#eee'}} contentStyle={{ color: '#000' }}/>
-=======
           {/* Analytics Chart Container - Fixed Height for Recharts */}
           <div style={{ background: '#242424', padding: '20px', borderRadius: '8px', marginBottom: '20px', height: '250px', width: '100%' }}>
             <h3 style={{ marginTop: 0, textAlign: 'center', color: '#fff' }}>Log Volume by Severity</h3>
@@ -102,7 +92,6 @@ function App() {
                 <XAxis dataKey="name" stroke="#fff" />
                 <YAxis allowDecimals={false} stroke="#fff" />
                 <Tooltip cursor={{fill: '#333'}} contentStyle={{ color: '#000' }}/>
->>>>>>> f357a9d (Reverse proxy)
                 <Bar dataKey="count" radius={[4, 4, 0, 0]}>
                   {chartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -111,6 +100,8 @@ function App() {
               </BarChart>
             </ResponsiveContainer>
           </div>
+
+          <div style={{ marginBottom: '20px' }}>
 
           <div style={{ marginBottom: '20px' }}>
             <label>Filter Level: </label>
