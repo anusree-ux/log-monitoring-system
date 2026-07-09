@@ -3,9 +3,9 @@ services:
     image: postgres:15-alpine
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: supersecretpassword
-      POSTGRES_DB: logs_db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB:  ${POSTGRES_DB}
 
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -19,13 +19,21 @@ services:
   backend:
     build:
       context: ./backend
+
     environment:
-      DATABASE_URL: postgresql://postgres:supersecretpassword@db:5432/logs_db
+      DATABASE_URL: ${DATABASE_URL}
+
     depends_on:
       db:
         condition: service_healthy
+
     expose:
       - "5000"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   frontend:
     build:
