@@ -6,32 +6,46 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: supersecretpassword
       POSTGRES_DB: logs_db
+
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d logs_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   backend:
-    build: ./backend
+    build:
+      context: ./backend
     environment:
-      # This injects the Postgres connection string directly into Python!
-      - DATABASE_URL=postgresql://postgres:supersecretpassword@db:5432/logs_db
+      DATABASE_URL: postgresql://postgres:supersecretpassword@db:5432/logs_db
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    expose:
+      - "5000"
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+    expose:
+      - "80"
     depends_on:
-      - backend
+      backend:
+        condition: service_started
 
   nginx:
-    image: nginx:alpine
+    build:
+      context: ./nginx
     ports:
       - "80:80"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
-      - frontend
-      - backend
+      frontend:
+        condition: service_started
+      backend:
+        condition: service_started
 
-# This tells Docker to save the database permanently, even if the container restarts
 volumes:
   pgdata:
