@@ -51,3 +51,5 @@ Every update works like this:
 * How Docker containers run multiple services
 * How to deploy apps on AWS EC2
 * Basics of CI/CD automation
+
+Deployment tested successfully on AWS EC2.
