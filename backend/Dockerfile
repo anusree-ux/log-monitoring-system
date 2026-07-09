@@ -1,18 +1,18 @@
-# Start with a lightweight Python image
 FROM python:3.11-slim
 
-# Set the working directory inside the container
 WORKDIR /app
 
-# Copy the requirements file and install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the backend code into the container
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
 COPY . .
 
-# Expose the port Flask runs on
+RUN chown -R appuser:appuser /app
+
+USER appuser
+
 EXPOSE 5000
 
-# Command to run the application
 CMD ["python", "app.py"]
