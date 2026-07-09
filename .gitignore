@@ -1,7 +1,7 @@
 # Backend
 backend/venv/
 backend/__pycache__/
-backend/logs.db
+backend/instance/
 backend/.env
 
 # Frontend
