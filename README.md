@@ -36,6 +36,7 @@ You only need Docker installed.
    ```bash
    git clone https://github.com/anusree-ux/log-monitoring-system
    cd log-monitoring-system
+   cp .env.example .env
 
 3. Start the app
    ```bash
