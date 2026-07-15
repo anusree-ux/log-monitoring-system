@@ -72,7 +72,7 @@ function App() {
 
   return (
     <div className="dashboard-container">
-      <h2 className="header-title">⚡ System Operations Center</h2>
+      <h2 className="header-title">⚡ Log Monitoring System</h2>
 
       <div className="nav-tabs">
         <button 
