@@ -30,7 +30,13 @@ services:
     expose:
       - "5000"
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5000/health"]
+      test: 
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -38,22 +44,13 @@ services:
   frontend:
     build:
       context: ./frontend
-    expose:
-      - "80"
-    depends_on:
-      backend:
-        condition: service_started
 
-  nginx:
-    build:
-      context: ./nginx
     ports:
       - "80:80"
+
     depends_on:
-      frontend:
-        condition: service_started
       backend:
-        condition: service_started
+        condition: service_healthy
 
 volumes:
   pgdata:
