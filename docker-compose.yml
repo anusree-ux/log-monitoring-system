@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres:15-alpine
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -19,6 +19,8 @@ services:
   backend:
     build:
       context: ./backend
+
+    restart: unless-stopped
 
     environment:
       DATABASE_URL: ${DATABASE_URL}
@@ -44,6 +46,8 @@ services:
   frontend:
     build:
       context: ./frontend
+
+    restart: unless-stopped
 
     ports:
       - "80:80"

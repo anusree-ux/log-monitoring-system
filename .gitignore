@@ -14,3 +14,12 @@ frontend/.env
 Thumbs.db
 
 .env
+# Terraform
+terraform/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+.terraform.lock.hcl
+
+# SSH keys
+*.pub
