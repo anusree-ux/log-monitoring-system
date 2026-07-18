@@ -50,9 +50,9 @@ jobs:
           script: |
             # 1. Navigate to the project folder
             cd log-monitoring-system
-            
+
             # 2. Pull the latest code from GitHub
             git pull origin main
-            
+
             # 3. Rebuild and restart the Docker containers in the background
             docker compose up -d --build
