@@ -22,6 +22,11 @@ case "$1" in
         docker compose ps
         ;;
 
+    logs)
+        echo "Showing application logs..."
+        docker compose logs -f
+        ;;
+
     *)
         echo "Usage: ./deploy.sh {start|stop|restart|status}"
         exit 1

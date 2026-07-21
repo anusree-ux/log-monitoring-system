@@ -20,3 +20,8 @@ variable "project_name" {
   type        = string
   default     = "log-monitoring-system"
 }
+
+variable "ssh_allowed_cidr" {
+  description = "CIDR block allowed to SSH into the instance (your IP/32)"
+  type        = string
+}

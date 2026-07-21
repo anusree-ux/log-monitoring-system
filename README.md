@@ -1,7 +1,7 @@
 ##⚡ Log Monitoring & Alerting Platform
+
 A full-stack log monitoring application built with React, Flask, and PostgreSQL. This project demonstrates a complete DevOps workflow from local development to automated cloud deployment on AWS using Docker, Amazon ECR, GitHub Actions, Terraform, and EC2.
 
-I built this project to understand how a simple app moves from local development → cloud deployment (AWS).
 <img width="1267" height="932" alt="dashboard" src="https://github.com/user-attachments/assets/ed9db778-94b1-4c09-b241-10ade5266674" />
 
 

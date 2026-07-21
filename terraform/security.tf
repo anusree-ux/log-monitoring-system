@@ -21,7 +21,7 @@ resource "aws_security_group" "app_sg" {
     protocol = "tcp"
 
     cidr_blocks = [
-      "0.0.0.0/0"
+      var.ssh_allowed_cidr
     ]
   }
 
